@@ -46,8 +46,7 @@ Class LavaBeeAuthTrait extends Model
     {
 
         return $this->belongsToMany(config('lavaAuth.models.role'), config('lavaAuth.roleUserTable'))
-            ->withTimestamps()
-            ->wherePivot('approved',1);
+            ->withTimestamps();
     }
 
     /**
