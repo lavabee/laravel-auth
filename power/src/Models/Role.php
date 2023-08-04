@@ -1,7 +1,7 @@
 <?php
 
 
-namespace LavaBee\LaravelAuth\Models;
+namespace LavaBee\Power\Models;
 
 
 use Illuminate\Database\Eloquent\Model;

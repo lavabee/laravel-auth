@@ -3,5 +3,6 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/test',function (){
-    return "test route";
+    $a = \App\Models\User::find(1)->permissions;
+    dd($a);
 });

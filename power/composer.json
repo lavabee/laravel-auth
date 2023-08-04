@@ -1,8 +1,8 @@
 {
     "name": "lavabee/laravel-auth",
     "description": "A Powerful package for handling roles and permissions in Laravel.",
-    "minimum-stability": "dev",
     "license": "MIT",
+    "version" : "1.0",
     "authors": [
         {
             "name": "mr.doan",
@@ -12,7 +12,9 @@
     "require": {},
     "autoload": {
         "psr-4": {
-            "LavaBee\\LaravelAuth\\" : "src/"
+            "LavaBee\\Power\\" : "src/"
         }
-    }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
 }

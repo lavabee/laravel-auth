@@ -1,11 +1,11 @@
 <?php
 
 
-namespace LavaBee\LaravelAuth\Exceptions;
+namespace LavaBee\Power\Exceptions;
 
 use Exception;
 
-class PermissionDeniedException extends Exception
+class PermissionDeniedException extends LavaBeePowerException
 {
     /**
      * Create a new permission denied exception instance.
