@@ -11,19 +11,23 @@ use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\App;
+use JetBrains\PhpStorm\Pure;
 use LavaBee\Power\Exceptions\PermissionDeniedException;
 use LavaBee\Power\Models\Permission;
 
 /**
  * Trait HasPermissionTrait
- * @property BelongsToMany permissions
+ * @property BelongsToMany|collection permissions
  * @package LavaBee\Power\Traits
  */
 trait HasPermissionTrait
 {
 
 
-    public function permissionInstance()
+    /**
+     * @return Permission
+     */
+    public function permissionInstance(): Permission
     {
         $permission = config('power.models.permission');
         return app($permission);
@@ -43,17 +47,58 @@ trait HasPermissionTrait
         );
     }
 
-
-    public function AllPermissions() {
-        $permissionDirect = $this->permissions;
-
+    /**
+     * Check permission direct of model; option all or any
+     * @param string|int|array|Permission|\Illuminate\Support\Collection $permissions
+     * @param string option
+     * @return bool
+     */
+    public function hasPermissionDirect($permissions, $option = 'all'): bool
+    {
+        $permissionModel = $this->permissions->pluck('name');
+        $permissionArr = collect($this->preparePermissionAsArray($permissions))->pluck('name');
+        if($option == 'all'){
+            return $permissionArr->diff($permissionModel)->isEmpty();
+        }else{
+            return $permissionArr->intersect($permissionModel)->isNotEmpty();
+        }
     }
 
     /**
-     * @param  string|int|array|Permission|\Illuminate\Support\Collection  $permissions
-     *
+     * Check permission direct through role of model
+     * @param string|int|array|Permission|\Illuminate\Support\Collection $permissions
+     * @param string $option
+     * @return bool
      */
-    public function parseToPermission($permissions): array
+    public function hasPermissionThroughRole($permissions, $option = 'all') : bool
+    {
+        if(method_exists($this,'hasRole')){
+            return $this->hasRole($permissions->roles,$option);
+        }
+        return false;
+    }
+
+    public function hasPermission($permissions) : bool
+    {
+        return $this->hasPermissionDirect($permissions) || $this->hasPermissionThroughRole($permissions);
+    }
+
+    public function getPermissionThroughRole()
+    {
+
+    }
+
+    public function getAllPermission()
+    {
+
+    }
+    
+    /**
+     * Return array name of permission
+     * @param string|int|array|Permission|\Illuminate\Support\Collection $permissions
+     * @return Permission[]|\Illuminate\Support\Collection
+     */
+    private function preparePermissionAsArray($permissions): array|Collection
     {
         if(is_string($permissions) || is_int($permissions)){
             $permissions = array($permissions);
@@ -65,25 +110,12 @@ trait HasPermissionTrait
                 return $permission;
             }
             if(is_string($permission)){
-                return $this->permissionInstance()->where(['name' => $permission])->get();
+                return $this->permissionInstance()->where(['name' => $permission])->first();
             }
             if(is_int($permission)){
-                return $this->permissionInstance()->where(['id' => $permission])->get();
+                return $this->permissionInstance()->where(['id' => $permission])->first();
             }
         }, $permissions);
-    }
-
-    /**
-     * Determine if the model may perform the given permission.
-     *
-     * @param  string|array|Permission $permissions
-     *
-     * @throws \LavaBee\Power\Exceptions\PermissionDeniedException
-     */
-    public function hasPermission($permissions) : bool
-    {
-        return true;
-
     }
 
 

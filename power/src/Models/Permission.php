@@ -6,6 +6,7 @@ namespace LavaBee\Power\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Collection;
 use LavaBee\Power\Contracts\IPermission;
 
 /**
@@ -21,7 +22,7 @@ class Permission extends Model implements IPermission
 
     public function roles(): BelongsToMany
     {
-        $this->belongsToMany(
+        return $this->belongsToMany(
             config('power.models.role'),
             config('power.table_names.role_has_permissions'),
             config('power.column_names.permission_pivot_key'),
@@ -29,13 +30,6 @@ class Permission extends Model implements IPermission
         );
     }
 
-    public static function findByName(string $name): Permission
-    {
-        return static::where(['name' => $name])->first();
-    }
 
-    public static function findById(int $id): Permission
-    {
-        return static::where(['id' => $id])->first();
-    }
+
 }
