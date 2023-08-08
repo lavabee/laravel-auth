@@ -48,7 +48,7 @@ trait HasPermissionTrait
     }
 
     /**
-     * Check permission direct of model; option all or any
+     * Check permission direct of model; option value is all or any
      * @param string|int|array|Permission|\Illuminate\Support\Collection $permissions
      * @param string option
      * @return bool
@@ -56,31 +56,41 @@ trait HasPermissionTrait
     public function hasPermissionDirect($permissions, $option = 'all'): bool
     {
         $permissionModel = $this->permissions->pluck('name');
-        $permissionArr = collect($this->preparePermissionAsArray($permissions))->pluck('name');
+        $permissionCheck = collect($this->preparePermissionAsArray($permissions))->pluck('name');
         if($option == 'all'){
-            return $permissionArr->diff($permissionModel)->isEmpty();
+            return $permissionCheck->diff($permissionModel)->isEmpty();
         }else{
-            return $permissionArr->intersect($permissionModel)->isNotEmpty();
+            return $permissionCheck->intersect($permissionModel)->isNotEmpty();
         }
     }
 
     /**
-     * Check permission direct through role of model
+     * Check permission direct through role of model; option value is all or any
      * @param string|int|array|Permission|\Illuminate\Support\Collection $permissions
      * @param string $option
      * @return bool
      */
     public function hasPermissionThroughRole($permissions, $option = 'all') : bool
     {
-        if(method_exists($this,'hasRole')){
-            return $this->hasRole($permissions->roles,$option);
+        if (method_exists($this, 'hasRoles')) {
+            $permissionCheck = $this->preparePermissionAsArray($permissions);
+            if ($option === 'all') {
+                return collect($permissionCheck)->every(function ($permission) {
+                    return $this->hasRoles($permission->roles, 'all');
+                });
+            }
+            if ($option === 'any') {
+                return collect($permissionCheck)->contains(function ($permission) {
+                    return $this->hasRoles($permission->roles, 'any');
+                });
+            }
         }
         return false;
     }
 
-    public function hasPermission($permissions) : bool
+    public function hasPermission($permissions, $option = 'all') : bool
     {
-        return $this->hasPermissionDirect($permissions) || $this->hasPermissionThroughRole($permissions);
+        return $this->hasPermissionDirect($permissions, $option) || $this->hasPermissionThroughRole($permissions, $option);
     }
 
     public function getPermissionThroughRole()
@@ -92,7 +102,7 @@ trait HasPermissionTrait
     {
 
     }
-    
+
     /**
      * Return array name of permission
      * @param string|int|array|Permission|\Illuminate\Support\Collection $permissions
@@ -110,17 +120,12 @@ trait HasPermissionTrait
                 return $permission;
             }
             if(is_string($permission)){
-                return $this->permissionInstance()->where(['name' => $permission])->first();
+                return $this->permissionInstance()->where(['name' => $permission])->with('roles')->first();
             }
             if(is_int($permission)){
-                return $this->permissionInstance()->where(['id' => $permission])->first();
+                return $this->permissionInstance()->where(['id' => $permission])->with('roles')->first();
             }
         }, $permissions);
     }
-
-
-
-
-
 
 }

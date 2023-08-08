@@ -13,6 +13,7 @@ use LavaBee\Power\Contracts\IPermission;
  * @property int $id
  * @property string $name
  * @property string $guard_name
+ * @property BelongsToMany $roles
  * @property ?\Illuminate\Support\Carbon $created_at
  * @property ?\Illuminate\Support\Carbon $updated_at
  */
