@@ -5,10 +5,9 @@ namespace LavaBee\Power\Traits;
 
 
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use LavaBee\Power\Models\Permission;
 use LavaBee\Power\Models\Role;
-use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 
 /**
  * Trait HasRoleTrait
@@ -49,6 +48,27 @@ trait HasRoleTrait
         }
     }
 
+    public function attachRoles($roles)
+    {
+
+
+    }
+
+    public function detachRoles($roles)
+    {
+
+    }
+
+    public function detachAllRoles()
+    {
+
+    }
+
+    public function syncRoles($roles)
+    {
+
+    }
+
     /**
      * Return array of role
      * @param string|int|array|Role|\Illuminate\Support\Collection $roles
@@ -71,7 +91,10 @@ trait HasRoleTrait
             if(is_int($role)){
                 return $this->roleInstance()->where(['id' => $role])->first();
             }
-        }, $roles);
+        }, Arr::wrap($roles));
     }
+
+
+
 
 }

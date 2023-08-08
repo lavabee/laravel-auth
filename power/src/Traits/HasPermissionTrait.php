@@ -4,16 +4,11 @@
 namespace LavaBee\Power\Traits;
 
 
-
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Support\Facades\App;
-use JetBrains\PhpStorm\Pure;
-use LavaBee\Power\Exceptions\PermissionDeniedException;
 use LavaBee\Power\Models\Permission;
+use LavaBee\Power\Models\Role;
 
 /**
  * Trait HasPermissionTrait
@@ -22,7 +17,6 @@ use LavaBee\Power\Models\Permission;
  */
 trait HasPermissionTrait
 {
-
 
     /**
      * @return Permission
@@ -93,12 +87,48 @@ trait HasPermissionTrait
         return $this->hasPermissionDirect($permissions, $option) || $this->hasPermissionThroughRole($permissions, $option);
     }
 
-    public function getPermissionThroughRole()
+    /**
+     * @return Role[]
+     */
+    public function getPermissionsThroughRoles(): Collection
+    {
+        if(method_exists($this,'roles')){
+            return $this->roles->flatMap(function ($role) {
+                return $role->permissions;
+            })->sort()->values();
+        }
+        return collect([]);
+    }
+
+    public function getAllPermission(): Collection
+    {
+        /** @var Collection $permissions */
+        $permissions = $this->permissions;
+
+        if (method_exists($this, 'roles')) {
+            $permissions = $permissions->merge($this->getPermissionsThroughRoles());
+        }
+        return $permissions->sort()->values();
+    }
+
+
+    public function attachPermissions($permissions)
+    {
+
+
+    }
+
+    public function detachPermissions($permissions)
     {
 
     }
 
-    public function getAllPermission()
+    public function detachAllPermissions()
+    {
+
+    }
+
+    public function syncPermissions($permissions)
     {
 
     }
@@ -113,7 +143,7 @@ trait HasPermissionTrait
         if(is_string($permissions) || is_int($permissions)){
             $permissions = array($permissions);
         }elseif ($permissions instanceof Collection) {
-            $permissions = $permissions->toArray();
+            $permissions = $permissions->all();
         }
         return array_map(function ($permission) {
             if ($permission instanceof Permission) {
@@ -125,7 +155,7 @@ trait HasPermissionTrait
             if(is_int($permission)){
                 return $this->permissionInstance()->where(['id' => $permission])->with('roles')->first();
             }
-        }, $permissions);
+        }, Arr::wrap($permissions));
     }
 
 }

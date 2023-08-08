@@ -21,6 +21,10 @@ class Permission extends Model implements IPermission
 {
 
 
+    /**
+     * A model may have multiple direct permissions.
+     * @return BelongsToMany
+     */
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(
